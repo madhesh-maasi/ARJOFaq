@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "FAQ",
+    "environment": "spo",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "FAQTeams",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.15.0",
+    "libraryName": "faq",
+    "libraryId": "5b475980-cdfd-4542-a4d6-3306943fa06c",
+    "packageManager": "npm",
+    "solutionShortDescription": "FAQ description"
+  }
+}

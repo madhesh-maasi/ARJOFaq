@@ -1,0 +1,40 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+
+/* .MuiAccordionSummary-root.Mui-expanded {
+    max-height: 60px;
+} */
+
+.MuiAccordion-root:before {
+    position: unset !important;
+}
+
+.MuiAccordion-root.Mui-expanded:first-child {
+    margin-top: 16px !important;
+}
+
+.filterSelect .MuiAutocomplete-inputRoot {
+    padding-top: 0 !important;
+}
+
+.filterSelect svg {
+    margin-top: -2px;
+}
+
+.filterSearch .MuiInputBase-input.MuiOutlinedInput-input {
+    padding-top: 4px !important;
+    padding-bottom: 9px !important;
+}
+
+.filterSearch svg {
+    margin-top: -4px;
+}
+
+.MuiAccordionSummary-content {
+    margin: 0 !important;
+}

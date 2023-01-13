@@ -1,0 +1,23 @@
+{
+    "name": "FAQ",
+    "version": "0.0.1",
+    "description": "",
+    "author": "",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "@microsoft/teamsfx-cli": "1.*"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@fluentui/react": "^8.104.1",
+        "@material-ui/core": "^4.12.4",
+        "@material-ui/icons": "^4.11.3",
+        "@material-ui/lab": "^4.0.0-alpha.61",
+        "@pnp/pnpjs": "^2.10.0",
+        "@pnp/sp": "^2.11.0",
+        "draft-js": "^0.11.7",
+        "react-draft-wysiwyg": "^1.15.0"
+    }
+}

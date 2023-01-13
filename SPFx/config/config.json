@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "faq-teams-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/faqTeams/FaqTeamsWebPart.js",
+          "manifest": "./src/webparts/faqTeams/FaqTeamsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "FaqTeamsWebPartStrings": "lib/webparts/faqTeams/loc/{locale}.js"
+  }
+}
