@@ -5,6 +5,16 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
+#workbenchPageContent {
+    max-width: 100%;
+}
+
+.content_3f3fd3c2,
+.CanvasZone {
+    padding: 0 !important;
+    max-width: 100%!important;
+}
+
 
 /* .MuiAccordionSummary-root.Mui-expanded {
     max-height: 60px;
@@ -37,4 +47,12 @@
 
 .MuiAccordionSummary-content {
     margin: 0 !important;
+}
+
+.ql-toolbar.ql-snow {
+    border-radius: 5px 5px 0 0;
+}
+
+.ql-container.ql-snow {
+    border-radius: 0 0 5px 5px;
 }

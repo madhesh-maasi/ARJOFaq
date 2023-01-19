@@ -19,7 +19,7 @@
                 color: #fff;
                 width: 500px;
                 padding: 8px 20px;
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: 600;
             }
         }
@@ -88,6 +88,59 @@
     }
 }
 
+.modalInput {
+    margin-top: 16px;
+}
+
+.modalBtnSection {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
 .DataNotFound {
     text-align: center;
+}
+
+.modalInputSection {
+    display: flex;
+}
+
+.FileNames {
+    display: flex;
+    flex-wrap: wrap;
+    .fileSection {
+        margin: 6px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+.fileAttached {
+    display: flex;
+    flex-wrap: wrap;
+    a {
+        text-decoration: none;
+        padding: 6px 20px;
+        cursor: pointer !important;
+        background-color: #c3ffc3;
+        color: #1b891b;
+        border-radius: 10px;
+    }
+}
+
+.attachmentTitle {
+    margin: 10px 0;
+}
+
+.customUpload {
+    position: relative;
+    padding: 12px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    .customUploadIcon {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
 }
