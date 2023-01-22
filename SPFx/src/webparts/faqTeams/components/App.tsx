@@ -46,8 +46,8 @@ import { Attachment } from "@pnp/sp/attachments";
 Quill.register("modules/imageResize", ImageResize);
 
 export interface IApp {
-  siteUrl: string;
-  list: string;
+  tenantURL: string;
+  siteName: string;
   teamName: string;
   channelName: string;
   // teamsContext: any;
@@ -154,10 +154,16 @@ const formats = [
   "color",
   "image",
 ];
+let toStateFiles = [];
 export const App: React.FunctionComponent<IApp> = (props: IApp) => {
-  // hardcoded URLs
-  const tenantURL = "https://chandrudemo.sharepoint.com";
-  const spWeb = "https://chandrudemo.sharepoint.com/sites/ARJOFAQ";
+  // development  URLs
+  // const tenantURL = "https://chandrudemo.sharepoint.com";
+  // const spWeb = `${tenantURL}/sites/ARJOFAQ`;
+  // let currentSite = "ARJOFAQ";
+  // production URLs
+  const tenantURL = props.tenantURL;
+  const spWeb = `${tenantURL}/sites/${props.siteName}`;
+  let currentSite = props.siteName;
   const web = Web(spWeb);
   const classes = useStyles();
   const [expanded, setExpanded] = useState("");
@@ -165,6 +171,7 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
   const [choicesCategory, setChoicesCategory] = useState(arrCategory);
   const [choicesSubCategory, setChoicesSubCategory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(arrSelectedCategory);
+  const [selectedSubCategory, setSelectedSubCategory] = useState({});
   const [seacrhValue, setSearchValue] = useState(strSearch);
   const [open, setOpen] = useState(false);
   const [modalError, setModalError] = useState(objModalError);
@@ -174,25 +181,15 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
   const getFiles = (e) => {
     let tempArrAttachments = e.target.files;
     for (let i = 0; i < tempArrAttachments.length; i++) {
-      arrAttachments.push({
-        name: tempArrAttachments[i].name,
-        content: tempArrAttachments[i],
-        Index: i,
-      });
+      arrAttachments.push(tempArrAttachments[i]);
     }
+
     console.log(arrAttachments);
     setSelectedFiles([...arrAttachments]);
   };
   // Delete File
-  const fileDelete = (index) => {
-    arrAttachments.splice(index, 1);
-    arrAttachments = arrAttachments.map((row, i) => {
-      return {
-        name: row.name,
-        content: row.content,
-        Index: i,
-      };
-    });
+  const fileDelete = (fileName) => {
+    arrAttachments = arrAttachments.filter((file) => file.name !== fileName);
     console.log(arrAttachments);
     setSelectedFiles([...arrAttachments]);
   };
@@ -242,7 +239,6 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
     // Dev
     let team = "HR Department";
     let Channel = "General";
-    let fileListData = [];
     console.log(team);
     console.log(Channel);
     let arrFiles = [];
@@ -259,63 +255,77 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
           (li) => li.Team === team && li.Channel === Channel
         )[0].ListName;
         // Changes need to be done Department to List name
-        department = await res.filter(
-          (li) => li.Team === team && li.Channel === Channel
-        )[0].Title;
-
         await web
           .getFolderByServerRelativeUrl(
             `FAQ_Assets/${
               res.filter((li) => li.Team === team && li.Channel === Channel)[0]
-                .Title
+                .ListName
             }`
           )
-          .files.get()
-          .then((files) => {
-            console.log(files);
-
-            for (let i = 0; i < files.length; i++) {
-              let _ServerRelativeUrl = files[i].ServerRelativeUrl;
+          .folders.get()
+          .then((folders) => {
+            console.log(folders);
+            folders.forEach(async (folder) => {
               web
-                .getFileByServerRelativeUrl(_ServerRelativeUrl)
-                .getItem()
-                .then((item) => {
-                  console.log(item);
-                  arrFiles.push({
-                    FileName: files[i].Name,
-                    Url: `${tenantURL}${files[i].ServerRelativeUrl}`,
-                    ListID: item.ListID,
-                  });
+                .getFolderByServerRelativeUrl(
+                  `FAQ_Assets/${
+                    res.filter(
+                      (li) => li.Team === team && li.Channel === Channel
+                    )[0].ListName
+                  }/${folder.Name}`
+                )
+                .files.get()
+                .then((files) => {
+                  for (let i = 0; i < files.length; i++) {
+                    let _ServerRelativeUrl = files[i].ServerRelativeUrl;
+                    web
+                      .getFileByServerRelativeUrl(_ServerRelativeUrl)
+                      .getItem()
+                      .then(async (item) => {
+                        await arrFiles.push({
+                          FileName: files[i].Name,
+                          Url: `${tenantURL}${files[i].ServerRelativeUrl}`,
+                          ListID: parseInt(folder.Name),
+                        });
+                        console.log(arrFiles);
+                      })
+                      .then(async () => {
+                        // Getting Data from list
+                        await web.lists
+                          .getByTitle(
+                            res.filter(
+                              (li) => li.Team === team && li.Channel === Channel
+                            )[0].ListName
+                          )
+                          .items.select(
+                            "*,Category/Title,Category/ID,SubCategory/Title,SubCategory/ID"
+                          )
+                          .expand("Category,SubCategory")
+                          .get()
+                          .then((res) => {
+                            res = res.filter((li) => li.Approved);
+                            arrAllQA = res.map((li) => {
+                              return {
+                                Answer: li.Answer,
+                                Approved: li.Approved,
+                                Category: li.Category,
+                                ID: li.ID,
+                                Question: li.Question,
+                                SubCategory: li.SubCategory,
+                                Files: arrFiles.filter(
+                                  (file) => file.ListID === li.ID
+                                ),
+                              };
+                            });
+                            console.log(arrAllQA);
+                            setAccordianItem([...arrAllQA]);
+                          })
+                          .catch((error) => console.log(error));
+                      });
+                  }
                 });
-            }
-          });
-        await web.lists
-          .getByTitle(
-            res.filter((li) => li.Team === team && li.Channel === Channel)[0]
-              .ListName
-          )
-          .items.select(
-            "*,Category/Title,Category/ID,SubCategory/Title,SubCategory/ID"
-          )
-          .expand("Category,SubCategory")
-          .get()
-          .then((res) => {
-            res = res.filter((li) => li.Approved);
-            arrAllQA = res.map((li) => {
-              return {
-                Answer: li.Answer,
-                Approved: li.Approved,
-                Category: li.Category,
-                ID: li.ID,
-                Question: li.Question,
-                SubCategory: li.SubCategory,
-                Files: arrFiles.filter((file) => file.ListID === li.ID),
-              };
             });
-            console.log(arrAllQA);
-            setAccordianItem([...arrAllQA]);
-          })
-          .catch((error) => console.log(error));
+          });
       });
   };
   const getCategory = (web) => {
@@ -350,22 +360,18 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
   // Bug in Resetting Sub Category
   const resetSubCategory = () => {
     objModalSelected.SubCategory = 0;
-    console.log(
-      arrSubCategory.filter(
-        (li) =>
-          li.category ===
-          arrCategory.filter((item) => item.id === objModalSelected.Category)[0]
-            .title
-      )
-    );
-    setChoicesSubCategory([
-      ...arrSubCategory.filter(
-        (li) =>
-          li.category ===
-          arrCategory.filter((item) => item.id === objModalSelected.Category)[0]
-            .title
-      ),
-    ]);
+    let objSelectedSub =
+      objModalSelected.Category !== 0
+        ? arrSubCategory.filter(
+            (li) =>
+              li.category ===
+              arrCategory.filter(
+                (item) => item.id === objModalSelected.Category
+              )[0].title
+          )
+        : [];
+    setSelectedSubCategory({ ...{} });
+    setChoicesSubCategory([...objSelectedSub]);
   };
   const resetError = () => {
     objModalError = {
@@ -402,7 +408,7 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
         Question: obj.Question,
         Answer: obj.Answer,
         CategoryId: obj.Category,
-        SubCategoryId: obj.SubCategory,
+        SubCategoryId: obj.SubCategory !== 0 ? obj.SubCategory : null,
         Tag: obj.Tag,
         Link: {
           Description: obj.Link !== "" ? "Click here" : "",
@@ -416,36 +422,51 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
         .then((res) => {
           console.log(res);
           let uploadID = res.data.ID;
-          //in case of multiple files,iterate or else upload the first file.
-          if (selectedFiles.length > 0) {
-            selectedFiles.forEach((file) => {
-              if (file !== undefined || file !== null) {
-                //assuming that the name of document library is Documents, change as per your requirement,
-                //this will add the file in root folder of the document library, if you have a folder named test, replace it as "/Documents/test"
-                web
-                  .getFolderByServerRelativeUrl(`FAQ_Assets/${department}`)
-                  .files.add(file.name, file, true)
-                  .then((data) =>
-                    data.file.getItem().then((fileItem: any) => {
-                      fileItem
-                        .update({
-                          ListID: uploadID,
-                        })
-                        .then((updatedItem: any) => {
-                          console.log(updatedItem);
-                        })
-                        .catch((error: any) => {
-                          console.log(error);
-                        });
-                    })
-                  );
-              }
-            });
-          }
-          setEditorState("");
-          arrAttachments = [];
-          setSelectedFiles([]);
-          handleClose();
+          let updateItem = {
+            LinkToFolder: {
+              Description: obj.Link !== "" ? "Click here" : "",
+              Url: `${spWeb}/FAQ_Assets/Forms/AllItems.aspx?id=/sites/${currentSite}/FAQ_Assets/${mainList}/${uploadID}`,
+            },
+          };
+          web.folders.add(`FAQ_Assets/${mainList}/${uploadID}`).then((res) => {
+            console.log(res);
+            web.lists
+              .getByTitle(mainList)
+              .items.getById(uploadID)
+              .update(updateItem);
+            if (selectedFiles.length > 0) {
+              selectedFiles.forEach((file) => {
+                if (file !== undefined || file !== null) {
+                  //assuming that the name of document library is Documents, change as per your requirement,
+                  //this will add the file in root folder of the document library, if you have a folder named test, replace it as "/Documents/test"
+                  web
+                    .getFolderByServerRelativeUrl(
+                      `FAQ_Assets/${mainList}/${uploadID}`
+                    )
+                    .files.add(file.name, file, true)
+                    .then((data) =>
+                      data.file.getItem().then((fileItem: any) => {
+                        fileItem
+                          .update({
+                            ListID: uploadID,
+                          })
+                          .then((updatedItem: any) => {
+                            console.log(updatedItem);
+                          })
+                          .catch((error: any) => {
+                            console.log(error);
+                          });
+                      })
+                    );
+                }
+              });
+            }
+            setEditorState("");
+            arrAttachments = [];
+            setSelectedFiles([]);
+            setSelectedSubCategory({});
+            handleClose();
+          });
         });
     }
   };
@@ -454,7 +475,7 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
     getFAQ(web);
     getCategory(web);
     getSubCategory(web);
-  }, [props.siteUrl]);
+  }, []);
 
   return (
     <ThemeProvider theme={appTheme}>
@@ -653,15 +674,7 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
                   // eslint-disable-next-line react/jsx-no-bind
                   getOptionLabel={(option) => option.title}
                   renderOption={(option, { selected }) => (
-                    <React.Fragment>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {option.title}
-                    </React.Fragment>
+                    <React.Fragment>{option.title}</React.Fragment>
                   )}
                   style={{ width: 320 }}
                   renderInput={(params) => (
@@ -683,28 +696,23 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
                   size="small"
                   id="checkboxes-tags-demo"
                   options={choicesSubCategory}
-                  value={
-                    objModalSelected.SubCategory === 0
-                      ? null
-                      : objModalSelected.SubCategory
-                  }
+                  value={selectedSubCategory}
                   onChange={(e, val) => {
-                    val
+                    val && val.id !== 0
                       ? (objModalSelected.SubCategory = val.id)
                       : (objModalSelected.SubCategory = 0);
+                    let objSub = choicesSubCategory.filter(
+                      (li) => li.id === objModalSelected.SubCategory
+                    );
+                    setSelectedSubCategory({
+                      ...(objSub.length > 0 ? objSub[0] : {}),
+                    });
+                    console.log(objModalSelected);
                   }}
                   // eslint-disable-next-line react/jsx-no-bind
                   getOptionLabel={(option) => option.title}
                   renderOption={(option, { selected }) => (
-                    <React.Fragment>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                      />
-                      {option.title}
-                    </React.Fragment>
+                    <React.Fragment>{option.title}</React.Fragment>
                   )}
                   style={{ width: 320 }}
                   renderInput={(params) => (
@@ -811,7 +819,7 @@ export const App: React.FunctionComponent<IApp> = (props: IApp) => {
                       <div className={styles.fileSection}>
                         <span>{file.name}</span>
                         <span
-                          onClick={() => fileDelete(file.Index)}
+                          onClick={() => fileDelete(file.name)}
                           style={{
                             marginLeft: 6,
                             color: "red",

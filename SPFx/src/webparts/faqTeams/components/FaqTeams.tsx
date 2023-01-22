@@ -13,7 +13,6 @@ export default class FaqTeams extends React.Component<IFaqTeamsProps, {}> {
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
 
   public render(): React.ReactElement<IFaqTeamsProps> {
-    const list = "FAQ";
     const TeamName = this.props.context.sdks.microsoftTeams.context.teamName;
     const ChannelName =
       this.props.context.sdks.microsoftTeams.context.channelName;
@@ -21,8 +20,8 @@ export default class FaqTeams extends React.Component<IFaqTeamsProps, {}> {
     // const ChannelName = "";
     return (
       <App
-        siteUrl={this.props.siteUrl}
-        list={list}
+        tenantURL={this.props.tenantURL}
+        siteName={this.props.siteName}
         teamName={TeamName}
         channelName={ChannelName}
         // teamsContext={TeamsContext}

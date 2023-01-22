@@ -6,6 +6,6 @@ export interface IFaqTeamsProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   context:WebPartContext;
-  siteUrl:string;
-  listName:string
+  tenantURL:string;
+  siteName:string
 }

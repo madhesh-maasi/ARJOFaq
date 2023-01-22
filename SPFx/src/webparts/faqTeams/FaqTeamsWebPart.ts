@@ -32,8 +32,8 @@ import "@pnp/sp/site-groups/web";
 export interface IFaqTeamsWebPartProps {
   description: string;
   // context:WebPartContext;
-  siteUrl:string;
-  listName:string;
+  tenantURL:string;
+  siteName:string;
 }
 
 export default class FaqTeamsWebPart extends BaseClientSideWebPart<IFaqTeamsWebPartProps> {
@@ -51,8 +51,8 @@ export default class FaqTeamsWebPart extends BaseClientSideWebPart<IFaqTeamsWebP
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         context:this.context,
-        siteUrl:this.properties.siteUrl,
-        listName:this.properties.listName
+        tenantURL:this.properties.tenantURL,
+        siteName:this.properties.siteName
         
       }
     );
@@ -111,11 +111,11 @@ export default class FaqTeamsWebPart extends BaseClientSideWebPart<IFaqTeamsWebP
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('siteUrl', {
-                  label: "Site URL"
+                PropertyPaneTextField('tenantURL', {
+                  label: "Tenant URL"
                 }),
-                PropertyPaneTextField('listName', {
-                  label: "List Name"
+                PropertyPaneTextField('siteName', {
+                  label: "Site Name"
                 })
               ]
             }
